@@ -1,3 +1,4 @@
 export async function onRequestGet({request:Request}) {
-   return new Response(`Hello world`) 
+   const value = await TODOS.list();
+   return new Response(JSON.stringify(value.keys)) 
 }
