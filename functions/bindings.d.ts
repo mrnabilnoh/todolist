@@ -1,5 +1,6 @@
 export {};
 
 declare global {
-  const TODOS: KVNamespace;
+  const TODOS_STORAGE: KVNamespace;
+  const TODOSV2_STORAGE: KVNamespace;
 }
