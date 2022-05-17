@@ -1,8 +1,5 @@
 export async function onRequestGet({request:Request}): Promise<Response> {
-   const json = await TODOS_STORAGE.list();
-   return new Response(JSON.stringify(json), {
-      headers: {
-        'content-type': 'application/json;charset=UTF-8',
-      },
-    })
+   const value = await TODOS_STORAGE.get("dedSYekRZGE");
+
+   return new Response(value);
 }
