@@ -1,7 +1,13 @@
-const errorHandler = async ({ next }) => {
+/**
+ * Middleware handler to catch all error in 'api/todos' functions
+ * @param  {} {next}
+ * @returns Promise
+ */
+const errorHandler = async ({ next }) : Promise<Response> => {
     try {
         const response = await next() as Response;
-        response.headers.set('X-Hello', 'Hello from functions Middleware Error Handler!');
+        
+        // Always return data in json format.
         response.headers.set('content-type', 'application/json;charset=UTF-8')
         return response;
     } catch (err) {

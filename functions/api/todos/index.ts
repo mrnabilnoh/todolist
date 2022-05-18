@@ -1,12 +1,13 @@
-const defaultData = {
-   todos: [
-     {
-       id: 1,
-       name: 'Sample Todo items messages.',
-       completed: false,
-     },
-   ],
- };
+import { nanoid } from 'nanoid'
+
+
+// Default TODO item
+const defaultData : TODO = {
+  id: 1,
+  name: 'Sample Todo items.',
+  completed: false,
+};
+
 /**
  * @param  {} {request
  * @param  {} env}
@@ -14,15 +15,37 @@ const defaultData = {
  */
 export const onRequestGet: PagesFunction<ENV> = async ({request, env}) : Promise<Response> =>  {
     /**
-     * @param  {} 'CF-Connecting-IP' Store Real Client IP
+     * Get Client IP from Cloudflare meta header.
+     * This will help to split user by ip session.
+     * @param  {} 'CF-Connecting-IP'
      */
-    const ip = request.headers.get('CF-Connecting-IP');
-    const myKey = `data-${ip}`;
+    const ip : string = request.headers.get('CF-Connecting-IP');
+    const storeKey : string = `store-${ip}`;
   
-    let data = await env.TODOS_STORAGE.get(myKey, { type: "json"});
-    if (!data) {
-        await env.TODOS_STORAGE.put(myKey, JSON.stringify(defaultData));
-        data = defaultData;
+    // get current ip session todo list link (if exist) in Cloudflare KV data store.
+    let data = await env.TODOS_STORAGE.get(storeKey, { type: "json"}) as string[];
+    if (data == null) {
+        // generate new unique id for sample todo list link
+        const uniqueId = nanoid(6);
+        data = [uniqueId];
+        // store new todo link in Cloudflare KV data store
+        await env.TODOS_STORAGE.put(storeKey, JSON.stringify(data));
+        // store new todo item in Cloudflare KV data store
+        await env.TODOS_STORAGE.put(uniqueId, JSON.stringify([defaultData]), { metadata:  {
+          text: "Sample Todo list"
+        } as TODO_META });
     }
-    return new Response(JSON.stringify(data));
+
+    let items = [] as TODO_LIST[];
+    for (const key in data) {
+      const {value, metadata} = await env.TODOS_STORAGE.getWithMetadata<TODO[],TODO_META>(key, { type: "json"});
+      if (value != null) {
+        items.push({
+          text: metadata.text,
+          items: value
+        })
+      }
+    }
+    
+    return new Response(JSON.stringify(items));
 }
