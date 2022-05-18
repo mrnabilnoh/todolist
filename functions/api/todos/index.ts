@@ -1,6 +1,10 @@
-export const onRequestGet: PagesFunction<{}> = async (context:any) =>  {
+type Env = {
+   TODOS_STORAGE:KVNamespace
+}
+
+export const onRequestGet: PagesFunction<Env> = async ({env}) : Promise<Response> =>  {
    // Contents of context object
-   const value = await context.env.TODOS_STORAGE.get("dedSYekRZGE");
+   const value = await env.TODOS_STORAGE.get("dedSYekRZGE");
 
    return new Response(value);
 }
