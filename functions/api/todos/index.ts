@@ -26,12 +26,13 @@ export const onRequestGet: PagesFunction<ENV> = async ({request, env}) : Promise
      */
     if (data == null) {
         // generate new unique id for sample todo list link
-        const uniqueId = nanoid(6);
+        const uniqueId = nanoid();
         data = [uniqueId];
         // store new todo link short link in Cloudflare KV data store
         await env.TODOS_STORAGE.put(storeKey, JSON.stringify(data));
         // store new todo item in Cloudflare KV data store
         await env.TODOS_STORAGE.put(uniqueId, JSON.stringify([defaultData]), { metadata:  {
+          reference_id: uniqueId,
           text: "Sample Todo list"
         } as TODO_META });
     }
@@ -42,6 +43,7 @@ export const onRequestGet: PagesFunction<ENV> = async ({request, env}) : Promise
       const {value, metadata} = await env.TODOS_STORAGE.getWithMetadata<TODO[],TODO_META>(data[idx], { type: "json"});
       if (value != null) {
         items.push({
+          id: metadata.reference_id,
           text: metadata.text,
           items: value
         })

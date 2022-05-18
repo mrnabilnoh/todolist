@@ -10,10 +10,12 @@ declare global {
     completed: boolean
   };
   type TODO_META = {
-    text: string,
+    reference_id: string
+    text: string
   }
   type TODO_LIST = {
-    text: string,
+    id: string
+    text: string
     items: TODO[]
   }
 }
