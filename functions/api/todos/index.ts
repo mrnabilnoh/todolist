@@ -37,9 +37,8 @@ export const onRequestGet: PagesFunction<ENV> = async ({request, env}) : Promise
     }
 
     let items = [];
-    for (const key in data) {
-      items.push(key)
-      const {value, metadata} = await env.TODOS_STORAGE.getWithMetadata<TODO[],TODO_META>(key, { type: "json"});
+    for (const idx in data) {
+      const {value, metadata} = await env.TODOS_STORAGE.getWithMetadata<TODO[],TODO_META>(data[idx], { type: "json"});
       items.push(value)
       items.push(metadata)
       if (value != null) {
