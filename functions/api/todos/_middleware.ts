@@ -1,15 +1,12 @@
 const errorHandler = async ({ next }) => {
     try {
-        return await next();
+        const response = await next() as Response;
+        response.headers.set('X-Hello', 'Hello from functions Middleware Error Handler!');
+        response.headers.set('content-type', 'application/json;charset=UTF-8')
+        return response;
     } catch (err) {
         return new Response(`${err.message}\n${err.stack}`, { status: 500 });
     }
 };
 
-const hello = async ({ next }) => {
-    const response = await next();
-    response.headers.set('X-Hello', 'Hello from functions Middleware!');
-    return response;
-};
-
-export const onRequest = [errorHandler, hello];
+export const onRequest = [errorHandler];
