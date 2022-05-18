@@ -1,5 +1,5 @@
-import { nanoid } from 'nanoid'
-
+import { customAlphabet, urlAlphabet } from 'nanoid'
+const nanoid = customAlphabet(urlAlphabet, 10)
 
 // default value for TODO item
 const defaultData : TODO = {
@@ -36,11 +36,10 @@ export const onRequestGet: PagesFunction<ENV> = async ({request, env}) : Promise
         } as TODO_META });
     }
 
-    let items = [];
+    // retrieve all todo list associate with current 'ip session'
+    let items = [] as TODO_LIST[];
     for (const idx in data) {
       const {value, metadata} = await env.TODOS_STORAGE.getWithMetadata<TODO[],TODO_META>(data[idx], { type: "json"});
-      items.push(value)
-      items.push(metadata)
       if (value != null) {
         items.push({
           text: metadata.text,
