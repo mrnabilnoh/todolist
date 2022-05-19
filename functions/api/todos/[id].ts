@@ -34,13 +34,11 @@ export const onRequestPost: TodoPagesFunction = async ({
   }
 
   // get todo item record associate with current todoItemKey
-  const todoItems = await env.KV_TODO_ITEM.get(todoItemKey, {
+  const todoItems = await env.KV_TODO_ITEM.get<TodoItem[]>(todoItemKey, {
     type: "json",
   });
-  if (todoItems != null) {
-    return new Response(JSON.stringify({
-      message: "404 Not Found todoItems : " + todoItemKey
-    }), { status : 404});
+  if (todoItems == null) {
+    return ResponseJsonNotFound();
   }
 
   // only proceed to get requestData if it pass todoItemKey check
@@ -51,8 +49,8 @@ export const onRequestPost: TodoPagesFunction = async ({
 
   const todoItem: TodoItem = requestData.item;
   // generate new todo item id, by getting the current highest id in data store plus 1
-  //todoItem.id = Math.max(...todoItems.map((elem) => elem.id), 0) + 1;
-  //todoItems.push(todoItem);
+  todoItem.id = Math.max(...todoItems.map((elem) => elem.id), 0) + 1;
+  todoItems.push(todoItem);
 
   // update todo item record with new todo item
   await env.KV_TODO_ITEM.put(todoItemKey, JSON.stringify(todoItems));
@@ -75,7 +73,7 @@ export const onRequestPut: TodoPagesFunction = async ({
   const todoItems = await env.KV_TODO_ITEM.get<TodoItem[]>(todoItemKey, {
     type: "json",
   });
-  if (todoItems != null) {
+  if (todoItems == null) {
     return ResponseJsonNotFound();
   }
 
@@ -123,7 +121,7 @@ export const onRequestDelete: TodoPagesFunction = async ({
   const todoItems = await env.KV_TODO_ITEM.get<TodoItem[]>(todoItemKey, {
     type: "json",
   });
-  if (todoItems != null) {
+  if (todoItems == null) {
     return ResponseJsonNotFound();
   }
 
