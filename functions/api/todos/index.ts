@@ -85,3 +85,10 @@ export const onRequestPost: PagesFunction<ENV> = async ({request, env}) : Promis
       title: json.title
     }))
 }
+
+// handle other HTTP method request
+export const onRequest: PagesFunction<ENV> = async () : Promise<Response> =>  {
+  return new Response("405 Method Not Allowed", {
+    status: 405
+  })
+}
