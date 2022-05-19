@@ -23,3 +23,5 @@ const headerInjector = async ({ next }) : Promise<Response> => {
 export const onRequest = [errorHandler, headerInjector];
 export const onRequestGet = [errorHandler, headerInjector];
 export const onRequestPost = [errorHandler, headerInjector];
+export const onRequestPut = [errorHandler, headerInjector];
+export const onRequestDelete = [errorHandler, headerInjector];

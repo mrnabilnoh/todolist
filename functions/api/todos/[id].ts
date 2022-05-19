@@ -5,17 +5,47 @@ export const onRequest: TodoPagesFunction = async () => {
 };
 
 export const onRequestGet: TodoPagesFunction = async ({ request, env, params }) => {
-  const clientIp: string = request.headers.get("CF-Connecting-IP");
+  const todoItemKey = params.id as string
 
   // handle invalid id
-  if(params.id == null || params.id.length < 10) {
+  if(todoItemKey == null || todoItemKey.length !== 10) {
     return new Response(JSON.stringify({
       message: "404 Not Found"
     }), { status : 404});
   }
 
-  return new Response(JSON.stringify({
-      clientIp: clientIp,
-      param: params.id
-  }));
+  // get todo items associate with current todoItemKey
+  const todoItems = await env.KV_TODO_ITEM.get<TodoItem[]>(todoItemKey, { type: "json" });
+  return new Response(JSON.stringify(todoItems));
+};
+
+export const onRequestPut: TodoPagesFunction = async ({ request, env, params }) => {
+  const todoItemKey = params.id as string
+
+  // handle invalid id
+  if(todoItemKey == null || todoItemKey.length !== 10) {
+    return new Response(JSON.stringify({
+      message: "404 Not Found"
+    }), { status : 404});
+  }
+
+  // get todo items associate with current todoItemKey
+  const todoItems = await env.KV_TODO_ITEM.get<TodoItem[]>(todoItemKey, { type: "json" });
+  return new Response(JSON.stringify(todoItems));
+};
+
+
+export const onRequestDelete: TodoPagesFunction = async ({ request, env, params }) => {
+  const todoItemKey = params.id as string
+
+  // handle invalid id
+  if(todoItemKey == null || todoItemKey.length !== 10) {
+    return new Response(JSON.stringify({
+      message: "404 Not Found"
+    }), { status : 404});
+  }
+
+  // get todo items associate with current todoItemKey
+  const todoItems = await env.KV_TODO_ITEM.get<TodoItem[]>(todoItemKey, { type: "json" });
+  return new Response(JSON.stringify(todoItems));
 };
