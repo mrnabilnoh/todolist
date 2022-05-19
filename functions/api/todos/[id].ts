@@ -38,7 +38,9 @@ export const onRequestPost: TodoPagesFunction = async ({
     type: "json",
   });
   if (todoItems != null) {
-    return ResponseJsonNotFound();
+    return new Response(JSON.stringify({
+      message: "404 Not Found todoItems : " + todoItemKey
+    }), { status : 404});
   }
 
   // only proceed to get requestData if it pass todoItemKey check
