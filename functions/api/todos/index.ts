@@ -7,6 +7,12 @@ const defaultTodoItem: TodoItem = {
   completed: false,
 };
 
+export const onRequest: TodoPagesFunction = async () => {
+  return new Response("405 Method Not Allowed", {
+    status: 405,
+  });
+};
+
 export const onRequestGet: TodoPagesFunction = async ({ request, env }) => {
   const clientIp: string = request.headers.get("CF-Connecting-IP");
   const todoSessionKey: string = `todo::${clientIp}`;
@@ -23,7 +29,10 @@ export const onRequestGet: TodoPagesFunction = async ({ request, env }) => {
     const uniqueId = nanoid();
     todoSessionItem = [uniqueId];
     // update user todo item listing
-    await env.KV_TODO_SESSION.put(todoSessionKey, JSON.stringify(todoSessionItem));
+    await env.KV_TODO_SESSION.put(
+      todoSessionKey,
+      JSON.stringify(todoSessionItem)
+    );
     // update user todo item
     await env.KV_TODO_ITEM.put(uniqueId, JSON.stringify([defaultTodoItem]), {
       metadata: {
@@ -54,11 +63,11 @@ export const onRequestGet: TodoPagesFunction = async ({ request, env }) => {
 
 export const onRequestPost: TodoPagesFunction = async ({ request, env }) => {
   const requestData = (await request.json()) as TodoRequestPostData;
-  const clientIp : string = request.headers.get("CF-Connecting-IP");
+  const clientIp: string = request.headers.get("CF-Connecting-IP");
   const todoSessionKey: string = `todo::${clientIp}`;
   // generate new unique id (this uniqueId is used for url shortlink)
-  const uniqueId : string = nanoid();
-  
+  const uniqueId: string = nanoid();
+
   // get current todo item listing (if exist) from Cloudflare KV data store.
   let todoSessionItem = (await env.KV_TODO_SESSION.get(todoSessionKey, {
     type: "json",
@@ -70,7 +79,10 @@ export const onRequestPost: TodoPagesFunction = async ({ request, env }) => {
   }
 
   // update user todo item listing
-  await env.KV_TODO_SESSION.put(todoSessionKey, JSON.stringify(todoSessionItem));
+  await env.KV_TODO_SESSION.put(
+    todoSessionKey,
+    JSON.stringify(todoSessionItem)
+  );
   // update user todo item
   await env.KV_TODO_ITEM.put(uniqueId, "[]", {
     metadata: {
@@ -85,10 +97,4 @@ export const onRequestPost: TodoPagesFunction = async ({ request, env }) => {
       title: requestData.title,
     })
   );
-};
-
-export const onRequest: TodoPagesFunction = async () => {
-  return new Response("405 Method Not Allowed", {
-    status: 405,
-  });
 };
