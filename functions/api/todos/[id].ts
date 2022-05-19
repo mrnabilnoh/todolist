@@ -34,9 +34,10 @@ export const onRequestPost: TodoPagesFunction = async ({
   }
 
   // get todo item record associate with current todoItemKey
-  const todoItems = await env.KV_TODO_ITEM.get<TodoItem[]>(todoItemKey, {
+  const { value, metadata} = await env.KV_TODO_ITEM.getWithMetadata<TodoItem[], TodoItemMeta>(todoItemKey, {
     type: "json",
   });
+  const todoItems = value
   if (todoItems == null) {
     return ResponseJsonNotFound();
   }
@@ -53,7 +54,7 @@ export const onRequestPost: TodoPagesFunction = async ({
   todoItems.push(todoItem);
 
   // update todo item record with new todo item
-  await env.KV_TODO_ITEM.put(todoItemKey, JSON.stringify(todoItems));
+  await env.KV_TODO_ITEM.put(todoItemKey, JSON.stringify(todoItems), { metadata: metadata});
 
   return new Response(JSON.stringify(todoItem));
 };
@@ -70,9 +71,10 @@ export const onRequestPut: TodoPagesFunction = async ({
   }
 
   // get todo item record associate with current todoItemKey
-  const todoItems = await env.KV_TODO_ITEM.get<TodoItem[]>(todoItemKey, {
+  const { value, metadata} = await env.KV_TODO_ITEM.getWithMetadata<TodoItem[], TodoItemMeta>(todoItemKey, {
     type: "json",
   });
+  const todoItems = value
   if (todoItems == null) {
     return ResponseJsonNotFound();
   }
@@ -101,7 +103,7 @@ export const onRequestPut: TodoPagesFunction = async ({
   }
 
   // update todo item record
-  await env.KV_TODO_ITEM.put(todoItemKey, JSON.stringify(todoItems));
+  await env.KV_TODO_ITEM.put(todoItemKey, JSON.stringify(todoItems), { metadata: metadata });
 
   return new Response(JSON.stringify(todoItem));
 };
@@ -118,9 +120,10 @@ export const onRequestDelete: TodoPagesFunction = async ({
   }
 
   // get todo item record associate with current todoItemKey
-  const todoItems = await env.KV_TODO_ITEM.get<TodoItem[]>(todoItemKey, {
+  const { value, metadata} = await env.KV_TODO_ITEM.getWithMetadata<TodoItem[], TodoItemMeta>(todoItemKey, {
     type: "json",
   });
+  const todoItems = value
   if (todoItems == null) {
     return ResponseJsonNotFound();
   }
@@ -153,7 +156,7 @@ export const onRequestDelete: TodoPagesFunction = async ({
     }
     
     // update todo item record
-    await env.KV_TODO_ITEM.put(todoItemKey, JSON.stringify(todoItems));
+    await env.KV_TODO_ITEM.put(todoItemKey, JSON.stringify(todoItems), { metadata: metadata});
   } else {
     // if all option not match, then there are nothing to delete
     return ResponseJsonBadRequest();
