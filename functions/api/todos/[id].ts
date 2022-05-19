@@ -48,7 +48,13 @@ export const onRequestPost: TodoPagesFunction = async ({
   // only proceed to get requestData if it pass todoItemKey check
   const requestData = (await request.json()) as TodoRequestPostData;
   const todoItem = requestData.item as TodoItem;
-  if (todoItem == null || todoItem.text == null || todoItem.text.length === 0) {
+  if (
+    todoItem == null ||
+    todoItem.id == null ||
+    todoItem.text == null ||
+    todoItem.completed == null ||
+    todoItem.text.length === 0
+  ) {
     return ResponseJsonBadRequest();
   }
 
@@ -90,12 +96,13 @@ export const onRequestPut: TodoPagesFunction = async ({
   // only proceed to get requestData if it pass todoItemKey check
   const requestData = (await request.json()) as TodoRequestPutData;
   const todoItem = requestData.item as TodoItem;
-  
+
   if (
     todoItem == null ||
     todoItem.id == null ||
-    todoItem.id === 0 ||
     todoItem.text == null ||
+    todoItem.completed == null ||
+    todoItem.id === 0 ||
     todoItem.text.length === 0
   ) {
     return ResponseJsonBadRequest();
