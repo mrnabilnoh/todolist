@@ -1,20 +1,35 @@
 type TodoItem = {
   id: number;
-  name: string;
+  text: string;
   completed: boolean;
 };
+
 type TodoItemMeta = {
   reference_id: string;
   title: string;
 };
+
 type TodoItemListing = {
   id: string;
   title: string;
   items: TodoItem[];
 };
 
-type TodoRequestPostData = {
+type TodoRequestNewData = {
   title: string;
+};
+
+type TodoRequestPostData = {
+  item: TodoItem;
+};
+
+type TodoRequestPutData = {
+  item: TodoItem;
+};
+
+type TodoRequestDeleteData = {
+  id: number;
+  delete_parent: boolean;
 };
 
 type TodoPagesFunction<
