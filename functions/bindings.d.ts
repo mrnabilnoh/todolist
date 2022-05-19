@@ -10,6 +10,7 @@ declare global {
     completed: boolean
   };
   type TODO_META = {
+    session: string,
     reference_id: string
     text: string
   }
@@ -17,5 +18,8 @@ declare global {
     id: string
     text: string
     items: TODO[]
+  }
+  type TODO_NEW = {
+    title: string
   }
 }

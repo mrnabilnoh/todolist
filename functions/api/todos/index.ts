@@ -2,7 +2,7 @@ import { customAlphabet, urlAlphabet } from 'nanoid'
 const nanoid = customAlphabet(urlAlphabet, 10)
 
 // default value for TODO item
-const defaultData : TODO = {
+const DEFAULT_TODO : TODO = {
   id: 1,
   name: 'Sample Todo items.',
   completed: false,
@@ -31,7 +31,8 @@ export const onRequestGet: PagesFunction<ENV> = async ({request, env}) : Promise
         // store new todo link short link in Cloudflare KV data store
         await env.TODOS_STORAGE.put(storeKey, JSON.stringify(data));
         // store new todo item in Cloudflare KV data store
-        await env.TODOS_STORAGE.put(uniqueId, JSON.stringify([defaultData]), { metadata:  {
+        await env.TODOS_STORAGE.put(uniqueId, JSON.stringify([DEFAULT_TODO]), { metadata:  {
+          session: storeKey,
           reference_id: uniqueId,
           text: "Sample Todo list"
         } as TODO_META });
@@ -51,4 +52,36 @@ export const onRequestGet: PagesFunction<ENV> = async ({request, env}) : Promise
     }
     
     return new Response(JSON.stringify(items));
+}
+
+export const onRequestPost: PagesFunction<ENV> = async ({request, env}) : Promise<Response> =>  {
+    const json = await request.json() as TODO_NEW;
+  
+    // get client IP from Cloudflare meta header.
+    const ip : string = request.headers.get('CF-Connecting-IP');
+    const storeKey : string = `store-${ip}`;
+    // generate new unique id for sample todo list link
+    const uniqueId = nanoid();
+    
+    // get current todo list link (if exist) based on 'ip session' in Cloudflare KV data store.
+    let data = await env.TODOS_STORAGE.get(storeKey, { type: "json"}) as string[];
+    if (data == null) {
+      data = [uniqueId]
+    } else {
+      data.push(uniqueId)
+    }
+
+    // store new todo link short link in Cloudflare KV data store
+    await env.TODOS_STORAGE.put(storeKey, JSON.stringify(data));
+    // store new todo item in Cloudflare KV data store
+    await env.TODOS_STORAGE.put(uniqueId, JSON.stringify([DEFAULT_TODO]), { metadata:  {
+      session: storeKey,
+      reference_id: uniqueId,
+      text: json.title
+    } as TODO_META });
+
+    return new Response(JSON.stringify({
+      reference_id: uniqueId,
+      title: json.title
+    }))
 }
