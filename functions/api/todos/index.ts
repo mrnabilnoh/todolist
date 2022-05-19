@@ -74,7 +74,7 @@ export const onRequestPost: PagesFunction<ENV> = async ({request, env}) : Promis
     // store new todo link short link in Cloudflare KV data store
     await env.TODOS_STORAGE.put(storeKey, JSON.stringify(data));
     // store new todo item in Cloudflare KV data store
-    await env.TODOS_STORAGE.put(uniqueId, JSON.stringify([DEFAULT_TODO]), { metadata:  {
+    await env.TODOS_STORAGE.put(uniqueId, "[]", { metadata:  {
       session: storeKey,
       reference_id: uniqueId,
       text: json.title
