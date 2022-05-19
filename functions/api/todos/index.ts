@@ -1,94 +1,94 @@
-import { customAlphabet, urlAlphabet } from 'nanoid'
-const nanoid = customAlphabet(urlAlphabet, 10)
+import { customAlphabet, urlAlphabet } from "nanoid";
+const nanoid = customAlphabet(urlAlphabet, 10);
 
-// default value for TODO item
-const DEFAULT_TODO : TODO = {
+const defaultTodoItem: TodoItem = {
   id: 1,
-  name: 'Sample Todo items.',
+  name: "Sample Todo items.",
   completed: false,
 };
 
-/**
- * @param  {} request: Http Request
- * @param  {} env: Cloudflare Environment
- * @returns Promise
- */
-export const onRequestGet: PagesFunction<ENV> = async ({request, env}) : Promise<Response> =>  {
-    // get client IP from Cloudflare meta header.
-    const ip : string = request.headers.get('CF-Connecting-IP');
-    const storeKey : string = `store-${ip}`;
-  
-    // get current todo list link (if exist) based on 'ip session' in Cloudflare KV data store.
-    let data = await env.TODOS_STORAGE.get(storeKey, { type: "json"}) as string[];
-    /**
-     * if data equal to 'null', then we assume this 'ip' is a new session.
-     * proceed to create sample todo list item for example.
-     */
-    if (data == null) {
-        // generate new unique id for sample todo list link
-        const uniqueId = nanoid();
-        data = [uniqueId];
-        // store new todo link short link in Cloudflare KV data store
-        await env.TODOS_STORAGE.put(storeKey, JSON.stringify(data));
-        // store new todo item in Cloudflare KV data store
-        await env.TODOS_STORAGE.put(uniqueId, JSON.stringify([DEFAULT_TODO]), { metadata:  {
-          session: storeKey,
-          reference_id: uniqueId,
-          text: "Sample Todo list"
-        } as TODO_META });
-    }
+export const onRequestGet: TodoPagesFunction = async ({ request, env }) => {
+  const clientIp: string = request.headers.get("CF-Connecting-IP");
+  const todoSessionKey: string = `todo::${clientIp}`;
 
-    // retrieve all todo list associate with current 'ip session'
-    let items = [] as TODO_LIST[];
-    for (const idx in data) {
-      const {value, metadata} = await env.TODOS_STORAGE.getWithMetadata<TODO[],TODO_META>(data[idx], { type: "json"});
-      if (value != null) {
-        items.push({
-          id: metadata.reference_id,
-          text: metadata.text,
-          items: value
-        })
-      }
-    }
-    
-    return new Response(JSON.stringify(items));
-}
+  // get current todo item listing (if exist) from Cloudflare KV data store.
+  let todoSessionItem = (await env.KV_TODO_SESSION.get(todoSessionKey, {
+    type: "json",
+  })) as string[];
 
-export const onRequestPost: PagesFunction<ENV> = async ({request, env}) : Promise<Response> =>  {
-    const json = await request.json() as TODO_NEW;
-  
-    // get client IP from Cloudflare meta header.
-    const ip : string = request.headers.get('CF-Connecting-IP');
-    const storeKey : string = `store-${ip}`;
-    // generate new unique id for sample todo list link
+  // if todoSessionItem equal to 'null', then we assume clientIp is a new session.
+  // proceed to create new todo list with example data.
+  if (todoSessionItem == null) {
+    // generate new unique id (this uniqueId is used for url shortlink)
     const uniqueId = nanoid();
-    
-    // get current todo list link (if exist) based on 'ip session' in Cloudflare KV data store.
-    let data = await env.TODOS_STORAGE.get(storeKey, { type: "json"}) as string[];
-    if (data == null) {
-      data = [uniqueId]
-    } else {
-      data.push(uniqueId)
+    todoSessionItem = [uniqueId];
+    // update user todo item listing
+    await env.KV_TODO_SESSION.put(todoSessionKey, JSON.stringify(todoSessionItem));
+    // update user todo item
+    await env.KV_TODO_ITEM.put(uniqueId, JSON.stringify([defaultTodoItem]), {
+      metadata: {
+        reference_id: uniqueId,
+        title: defaultTodoItem.name,
+      } as TodoItemMeta,
+    });
+  }
+
+  // retrieve all todo item associate with current clientIp
+  let todoItems = [] as TodoItemListing[];
+  for (const idx in todoSessionItem) {
+    const { value, metadata } = await env.KV_TODO_ITEM.getWithMetadata<
+      TodoItem[],
+      TodoItemMeta
+    >(todoSessionItem[idx], { type: "json" });
+    if (value != null) {
+      todoItems.push({
+        id: metadata.reference_id,
+        title: metadata.title,
+        items: value,
+      });
     }
+  }
 
-    // store new todo link short link in Cloudflare KV data store
-    await env.TODOS_STORAGE.put(storeKey, JSON.stringify(data));
-    // store new todo item in Cloudflare KV data store
-    await env.TODOS_STORAGE.put(uniqueId, "[]", { metadata:  {
-      session: storeKey,
+  return new Response(JSON.stringify(todoItems));
+};
+
+export const onRequestPost: TodoPagesFunction = async ({ request, env }) => {
+  const requestData = (await request.json()) as TodoRequestPostData;
+  const clientIp : string = request.headers.get("CF-Connecting-IP");
+  const todoSessionKey: string = `todo::${clientIp}`;
+  // generate new unique id (this uniqueId is used for url shortlink)
+  const uniqueId : string = nanoid();
+  
+  // get current todo item listing (if exist) from Cloudflare KV data store.
+  let todoSessionItem = (await env.KV_TODO_SESSION.get(todoSessionKey, {
+    type: "json",
+  })) as string[];
+  if (todoSessionItem == null) {
+    todoSessionItem = [uniqueId];
+  } else {
+    todoSessionItem.push(uniqueId);
+  }
+
+  // update user todo item listing
+  await env.KV_TODO_SESSION.put(todoSessionKey, JSON.stringify(todoSessionItem));
+  // update user todo item
+  await env.KV_TODO_ITEM.put(uniqueId, "[]", {
+    metadata: {
       reference_id: uniqueId,
-      text: json.title
-    } as TODO_META });
+      title: requestData.title,
+    } as TodoItemMeta,
+  });
 
-    return new Response(JSON.stringify({
+  return new Response(
+    JSON.stringify({
       reference_id: uniqueId,
-      title: json.title
-    }))
-}
+      title: requestData.title,
+    })
+  );
+};
 
-// handle other HTTP method request
-export const onRequest: PagesFunction<ENV> = async () : Promise<Response> =>  {
+export const onRequest: TodoPagesFunction = async () => {
   return new Response("405 Method Not Allowed", {
-    status: 405
-  })
-}
+    status: 405,
+  });
+};
