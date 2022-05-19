@@ -20,4 +20,6 @@ const headerInjector = async ({ next }) : Promise<Response> => {
     return response;
 };
 
+export const onRequestGet = [errorHandler, headerInjector];
+export const onRequestPost = [errorHandler, headerInjector];
 export const onRequest = [errorHandler, headerInjector];
