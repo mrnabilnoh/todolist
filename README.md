@@ -1,4 +1,6 @@
 [![DeepScan grade](https://deepscan.io/api/teams/17735/projects/21083/branches/595536/badge/grade.svg)](https://deepscan.io/dashboard#view=project&tid=17735&pid=21083&bid=595536)
+[![Node.js CI](https://github.com/mrnabilnoh/todolist/actions/workflows/node.js.yml/badge.svg)](https://github.com/mrnabilnoh/todolist/actions/workflows/node.js.yml)
+[![ESLint](https://github.com/mrnabilnoh/todolist/actions/workflows/eslint.yml/badge.svg)](https://github.com/mrnabilnoh/todolist/actions/workflows/eslint.yml)
 
 # Getting Started with Create React App
 
