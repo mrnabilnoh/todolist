@@ -42,7 +42,7 @@ export const onRequestGet: TodoPagesFunction = async ({ request, env }) => {
   // retrieve all todo list associate with current clientIp
   let todoItems = [] as TodoItemListing[];
   for (const idx in todoSession) {
-    const { metadata } = await env.KV_TODO_ITEM.getWithMetadata<
+    const { value, metadata } = await env.KV_TODO_ITEM.getWithMetadata<
       TodoItem[],
       TodoItemMeta
     >(todoSession[idx], { type: "json" });
@@ -50,6 +50,7 @@ export const onRequestGet: TodoPagesFunction = async ({ request, env }) => {
       todoItems.push({
         id: metadata.reference_id,
         title: metadata.title,
+        total: value.length
       });
     }
   }

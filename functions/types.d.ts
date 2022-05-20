@@ -12,6 +12,7 @@ type TodoItemMeta = {
 type TodoItemListing = {
   id: string;
   title: string;
+  total: number
 };
 
 type TodoRequestNewData = {
