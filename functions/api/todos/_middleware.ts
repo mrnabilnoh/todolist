@@ -17,6 +17,8 @@ const headerInjector = async ({ next }) : Promise<Response> => {
     const response = await next() as Response;
     // always return response as 'application/json'
     response.headers.set('content-type', 'application/json;charset=UTF-8')
+    // allow cross origin request for development
+    response.headers.set('Access-Control-Allow-Origin', "*");
     return response;
 };
 
