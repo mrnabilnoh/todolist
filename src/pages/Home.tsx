@@ -1,21 +1,28 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState, useCallback} from "react";
 import Card from "../components/Card";
 
 function Home() {
   const isMounted = useRef(true);
+  const inputRef = useRef<HTMLInputElement>(null);
+
   const [state, setState] = useState({
     todos: [],
-    isLoading: false
-  })
+    title: "",
+    isLoading: false,
+  });
 
   useEffect(() => {
+    if (inputRef.current != null) {
+      inputRef.current.focus();
+    }
     const getTodos = async () => {
-      const resp = await fetch('https://todolist-eox.pages.dev/api/todos');
+      // todo: can improve more, maybe read it from 'env', so can make the domain name dynamic
+      const resp = await fetch("https://todolist-eox.pages.dev/api/todos");
       const todosResp = await resp.json();
-      setState(prevState => ({
+      setState((prevState) => ({
         ...prevState,
-        todos: todosResp
-      }))
+        todos: todosResp,
+      }));
     };
 
     getTodos();
@@ -25,26 +32,35 @@ function Home() {
     };
   }, []);
 
+  const handleChange = (e:React.ChangeEvent<HTMLInputElement>) => {
+    setState((prevState) => ({
+      ...prevState,
+      title: e.target.value
+    }));
+  };
+
   const sendRequest = useCallback(async () => {
     // don't send again while we are sending
     if (state.isLoading) return;
     // update state
-      setState(prevState => ({
-        ...prevState,
-        isLoading: true
-      }))
+    setState((prevState) => ({
+      ...prevState,
+      isLoading: true,
+    }));
+    console.log(state.title);
+    
     // send the actual request
     // await API.sendRequest();
     // only proceed if still in current component
     if (isMounted.current) {
       // once the request is sent, update state again
-      setState(prevState => ({
+      setState((prevState) => ({
         ...prevState,
-        isLoading: false
-      }))
+        isLoading: false,
+      }));
     }
   }, [state]); // update the callback if the state changes
-  
+
   return (
     <div>
       <form className="flex justify-center mt-10">
@@ -55,10 +71,12 @@ function Home() {
               type="text"
               placeholder="Write here..."
               className="w-full outline-none"
+              onChange={handleChange}
+              ref={inputRef}
             />
             <button
               className="bg-green-500 px-2 py-1 rounded-md text-white font-semibold"
-              disabled={state.isLoading}
+              disabled={state.isLoading || state.title.length === 0}
               onClick={sendRequest}
             >
               create
@@ -67,7 +85,7 @@ function Home() {
         </div>
       </form>
       <div>
-      <Card items={state.todos}/>
+        <Card items={state.todos} />
       </div>
     </div>
   );
