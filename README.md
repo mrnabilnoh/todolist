@@ -2,7 +2,7 @@
 [![Node.js CI](https://github.com/mrnabilnoh/todolist/actions/workflows/node.js.yml/badge.svg)](https://github.com/mrnabilnoh/todolist/actions/workflows/node.js.yml)
 [![ESLint](https://github.com/mrnabilnoh/todolist/actions/workflows/eslint.yml/badge.svg)](https://github.com/mrnabilnoh/todolist/actions/workflows/eslint.yml)
 
-# Getting Started with Create React App - TO DO List
+# Getting Started with Create React App - TO DO List 2
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
